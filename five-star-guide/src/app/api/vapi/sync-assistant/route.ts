@@ -23,10 +23,21 @@ export async function POST(req: NextRequest) {
   }
 
   const agent = client.voiceAgents[0]
+
   const systemPrompt =
-    client.prompt ||
     agent?.systemPrompt ||
+    client.prompt ||
     `You are a helpful receptionist for ${client.name}. Your goal is to qualify the lead and book an appointment.`
+
+  const voiceId = agent?.voiceId || 'pNInz6obpgDQGcFmaJgB'
+  const language = agent?.language || 'en'
+  const firstMessage =
+    agent?.firstMessage || `Hi, thanks for calling ${client.name}! How can I help you today?`
+
+  // Webhook URL from env or auto-detect
+  const webhookUrl = process.env.NEXT_PUBLIC_APP_URL
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/vapi/webhook`
+    : undefined
 
   try {
     if (agent?.vapiAssistantId) {
@@ -34,6 +45,10 @@ export async function POST(req: NextRequest) {
       await updateVapiAssistant(agent.vapiAssistantId, {
         name: agent.name,
         systemPrompt,
+        voiceId,
+        language,
+        firstMessage,
+        webhookUrl,
       })
       await prisma.voiceAgent.update({
         where: { id: agent.id },
@@ -49,12 +64,20 @@ export async function POST(req: NextRequest) {
       const vapiAssistant = await createVapiAssistant({
         name: agent?.name || `${client.name} Agent`,
         systemPrompt,
+        voiceId,
+        language,
+        firstMessage,
+        webhookUrl,
       })
 
       if (agent) {
         await prisma.voiceAgent.update({
           where: { id: agent.id },
-          data: { vapiAssistantId: vapiAssistant.id, systemPrompt, status: 'active' },
+          data: {
+            vapiAssistantId: vapiAssistant.id,
+            systemPrompt,
+            status: 'active',
+          },
         })
       } else {
         await prisma.voiceAgent.create({
@@ -63,6 +86,9 @@ export async function POST(req: NextRequest) {
             name: `${client.name} Agent`,
             vapiAssistantId: vapiAssistant.id,
             systemPrompt,
+            voiceId,
+            language,
+            firstMessage,
             status: 'active',
           },
         })

@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "VoiceAgent" ADD COLUMN IF NOT EXISTS "voiceId" TEXT DEFAULT 'pNInz6obpgDQGcFmaJgB';
+ALTER TABLE "VoiceAgent" ADD COLUMN IF NOT EXISTS "language" TEXT DEFAULT 'en';
+ALTER TABLE "VoiceAgent" ADD COLUMN IF NOT EXISTS "firstMessage" TEXT;
