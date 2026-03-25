@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Agency {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  clients       ClientAccount[]
+  subscriptions Subscription[]
+}
+
+model User {
+  id        String   @id @default(uuid()) // Can link to Supabase auth.users UUID
+  email     String   @unique
+  name      String?
+  agencyId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agency Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+}
+
+model ClientAccount {
+  id              String   @id @default(uuid())
+  agencyId        String
+  name            String
+  industry        String?
+  phone           String?
+  city            String?
+  businessHours   Json?
+  emergencyToggle Boolean  @default(false)
+  prompt          String?
+  voiceSettings   Json?
+  smsTemplate     String?
+  emailTemplate   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  agency Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  services       Service[]
+  serviceAreas   ServiceArea[]
+  leads          Lead[]
+  voiceAgents    VoiceAgent[]
+  phoneNumbers   PhoneNumber[]
+  appointments   Appointment[]
+  outreachAssets OutreachAsset[]
+}
+
+model IndustryTemplate {
+  id                  String   @id @default(uuid())
+  name                String
+  description         String?
+  defaultPrompt       String?
+  qualifyingQuestions Json?
+  urgencyLogic        Json?
+  bookingDefaults     Json?
+  smsFollowUp         String?
+  missedCallWorkflow  Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model VoiceAgent {
+  id              String   @id @default(uuid())
+  clientId        String
+  vapiAssistantId String?
+  name            String
+  systemPrompt    String?
+  status          String   @default("inactive")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model PhoneNumber {
+  id           String   @id @default(uuid())
+  clientId     String
+  phoneNumber  String
+  twilioSid    String?
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  clientId    String
+  name        String
+  description String?
+  price       Float?
+  createdAt   DateTime @default(now())
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model ServiceArea {
+  id       String   @id @default(uuid())
+  clientId String
+  name     String
+  zipCodes String[]
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model Lead {
+  id        String   @id @default(uuid())
+  clientId  String
+  name      String
+  phone     String?
+  email     String?
+  status    String   @default("New") // New, Qualified, Booked, Callback Needed, No Answer, Won, Lost
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client       ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  callLogs     CallLog[]
+  appointments Appointment[]
+}
+
+model CallLog {
+  id              String   @id @default(uuid())
+  leadId          String
+  durationSeconds Int?
+  transcript      String?
+  recordingUrl    String?
+  status          String   @default("completed") // completed, missed, failed
+  createdAt       DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  clientId  String
+  leadId    String
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("scheduled") // scheduled, completed, canceled
+  notes     String?
+  createdAt DateTime @default(now())
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  lead   Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  agencyId             String
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  planTier             String   @default("Starter") // Starter, Growth, Pro
+  status               String   @default("active")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  agency Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+}
+
+model OutreachAsset {
+  id            String   @id @default(uuid())
+  clientId      String
+  type          String   // cold_email, cold_call, voicemail, sms
+  content       String
+  createdAt     DateTime @default(now())
+
+  client ClientAccount @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
