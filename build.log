@@ -1,0 +1,31 @@
+
+> five-star-guide@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\roryu\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\roryu\five-star-guide\package-lock.json
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.8s
+  Running TypeScript ...
+Failed to type check.
+
+./five-star-guide/src/app/api/auth/provision/route.ts:24:51
+Type error: Parameter 'tx' implicitly has an 'any' type.
+
+  [90m22 |[0m
+  [90m23 |[0m   [90m// Create Agency and User in a transaction[0m
+[31m[1m>[0m [90m24 |[0m   [36mconst[0m result = [36mawait[0m prisma.$transaction([36masync[0m (tx) => {
+  [90m   |[0m                                                   [31m[1m^[0m
+  [90m25 |[0m     [36mconst[0m email = user.email ?? [32m'unknown@agency.com'[0m
+  [90m26 |[0m     [36mconst[0m agencyName =
+  [90m27 |[0m       user.user_metadata?.agency_name ||
+Next.js build worker exited with code: 1 and signal: null

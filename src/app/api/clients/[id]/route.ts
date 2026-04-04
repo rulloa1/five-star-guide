@@ -3,10 +3,11 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const client = await prisma.clientAccount.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       voiceAgents: true,
       phoneNumbers: true,
@@ -32,12 +33,13 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const body = await req.json()
 
   const client = await prisma.clientAccount.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       ...(body.name !== undefined && { name: body.name }),
       ...(body.industry !== undefined && { industry: body.industry }),
