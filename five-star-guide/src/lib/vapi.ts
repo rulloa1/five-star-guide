@@ -215,3 +215,31 @@ export async function deleteVapiAssistant(assistantId: string) {
   if (!res.ok) throw new Error(await res.text())
   return res.json()
 }
+
+/**
+ * Trigger an outbound call via Vapi.
+ * Requires a Vapi phone number ID (the "from" number) and an assistant ID.
+ */
+export async function triggerVapiCall(payload: {
+  phoneNumberId: string   // Vapi phone number ID to call from
+  assistantId: string     // Vapi assistant to use for the call
+  toPhone: string         // E.164 format, e.g. +17135551234
+  metadata?: Record<string, string>
+}) {
+  const body: Record<string, unknown> = {
+    phoneNumberId: payload.phoneNumberId,
+    assistantId: payload.assistantId,
+    customer: { number: payload.toPhone },
+  }
+  if (payload.metadata) {
+    body.assistantOverrides = { metadata: payload.metadata }
+  }
+
+  const res = await fetch(`${VAPI_BASE_URL}/call/phone`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json() as Promise<{ id: string; status: string }>
+}

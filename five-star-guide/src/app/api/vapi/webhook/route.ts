@@ -53,7 +53,19 @@ export async function POST(req: NextRequest) {
       lower.includes('appointment') ||
       lower.includes('booked') ||
       lower.includes('scheduled')
-    const newStatus = isBooked ? 'Booked' : lead.status === 'New' ? 'Qualified' : lead.status
+    const needsCallback =
+      lower.includes('call me back') ||
+      lower.includes('callback') ||
+      lower.includes('call back') ||
+      lower.includes('try again later') ||
+      lower.includes('not a good time')
+    const newStatus = isBooked
+      ? 'Booked'
+      : needsCallback
+      ? 'Callback Needed'
+      : lead.status === 'New'
+      ? 'Qualified'
+      : lead.status
     if (newStatus !== lead.status || summary) {
       await prisma.lead.update({
         where: { id: lead.id },

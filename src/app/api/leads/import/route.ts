@@ -3,13 +3,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth'
 import Papa from 'papaparse'
+import { z } from 'zod'
+
+const leadSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  phone: z.string().min(1, 'Phone is required'),
+  email: z.string().email('Invalid email format').optional().or(z.literal('')),
+})
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth()
   if (auth instanceof NextResponse) return auth
 
   const formData = await req.formData()
-  const file = formData.get('file') as File
+  const file = formData.get('file') as File | null
   const clientId = formData.get('clientId') as string | null
 
   if (!file) {
@@ -35,10 +42,16 @@ export async function POST(req: NextRequest) {
       skipEmptyLines: true,
     })
 
-    const leads = parsed.data as { name: string; phone: string; email?: string }[]
+    const validationResult = z.array(leadSchema).safeParse(parsed.data)
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid CSV data', details: validationResult.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     const createdLeads = await prisma.lead.createMany({
-      data: leads.map((lead) => ({
+      data: validationResult.data.map((lead) => ({
         clientId,
         name: lead.name,
         phone: lead.phone ?? null,

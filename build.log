@@ -14,18 +14,24 @@
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
   Creating an optimized production build ...
-✓ Compiled successfully in 4.8s
+✓ Compiled successfully in 8.0s
   Running TypeScript ...
 Failed to type check.
 
-./five-star-guide/src/app/api/auth/provision/route.ts:24:51
-Type error: Parameter 'tx' implicitly has an 'any' type.
+.next/types/validator.ts:180:31
+Type error: Type 'typeof import("C:/Users/roryu/five-star-guide/src/app/api/clients/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/clients/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(_req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<any>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
 
-  [90m22 |[0m
-  [90m23 |[0m   [90m// Create Agency and User in a transaction[0m
-[31m[1m>[0m [90m24 |[0m   [36mconst[0m result = [36mawait[0m prisma.$transaction([36masync[0m (tx) => {
-  [90m   |[0m                                                   [31m[1m^[0m
-  [90m25 |[0m     [36mconst[0m email = user.email ?? [32m'unknown@agency.com'[0m
-  [90m26 |[0m     [36mconst[0m agencyName =
-  [90m27 |[0m       user.user_metadata?.agency_name ||
+  [90m178 |[0m   [36mtype[0m __IsExpected<[33mSpecific[0m [36mextends[0m [33mRouteHandlerConfig[0m<[32m"/api/clients/[id]"[0m>> = [33mSpecific[0m
+  [90m179 |[0m   [36mconst[0m handler = {} [36mas[0m [36mtypeof[0m [36mimport[0m([32m"../../src/app/api/clients/[id]/route.js"[0m)
+[31m[1m>[0m [90m180 |[0m   [36mtype[0m __Check = __IsExpected<[36mtypeof[0m handler>
+  [90m    |[0m                               [31m[1m^[0m
+  [90m181 |[0m   [90m// @ts-ignore[0m
+  [90m182 |[0m   [36mtype[0m __Unused = __Check
+  [90m183 |[0m }
 Next.js build worker exited with code: 1 and signal: null
