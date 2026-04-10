@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/supabase-server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 /**
  * Called after a successful Supabase login to ensure the user
@@ -21,7 +22,7 @@ export async function POST() {
   }
 
   // Create Agency and User in a transaction
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const email = user.email ?? 'unknown@agency.com'
     const agencyName =
       user.user_metadata?.agency_name ||
