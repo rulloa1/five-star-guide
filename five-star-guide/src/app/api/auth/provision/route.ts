@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/supabase-server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 /**
  * Called after a successful Supabase login to ensure the user
