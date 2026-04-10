@@ -21,7 +21,7 @@ export async function createVapiAssistant(payload: {
       },
       voice: {
         provider: '11labs',
-        voiceId: payload.voiceId || 'pNInz6obpgDQGcFmaJgB', // ElevenLabs Matthew
+        voiceId: payload.voiceId || 'pNinZfobpgDQGcFMajgB', // ElevenLabs Matthew
       },
       firstMessage:
         payload.firstMessage ||
@@ -60,6 +60,29 @@ export async function updateVapiAssistant(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(await res.text())
+  return res.json()
+}
+
+export async function triggerVapiCall(payload: {
+  phoneNumberId: string
+  assistantId: string
+  toPhone: string
+  metadata?: Record<string, unknown>
+}) {
+  const res = await fetch(`${VAPI_BASE_URL}/call`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.VAPI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      phoneNumberId: payload.phoneNumberId,
+      assistantId: payload.assistantId,
+      to: payload.toPhone,
+      metadata: payload.metadata || {},
+    }),
   })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
